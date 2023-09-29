@@ -38,7 +38,7 @@ def show_license_info():
         sys.exit(0)
 
 
-def totalsegmentator(input, output, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
+def totalsegmentator(input, output=None, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
                      fast=False, nora_tag="None", preview=False, task="total", roi_subset=None,
                      statistics=False, radiomics=False, crop_path=None, body_seg=False,
                      force_split=False, output_type="nifti", quiet=False, verbose=False, test=0,
@@ -51,8 +51,13 @@ def totalsegmentator(input, output, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
     For explanation of the arguments see description of command line 
     arguments in bin/TotalSegmentator.
     """
-    input = Path(input)
-    output = Path(output)
+    
+    img = nib.Nifti1Image(input, np.eye(4))
+    nib.save(img, './temp_input.nii.gz')  
+
+    input = Path('./temp_input.nii.gz')
+    if output != None:
+        output = Path(output)
 
     nora_tag = "None" if nora_tag is None else nora_tag
 
@@ -322,4 +327,6 @@ def totalsegmentator(input, output, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
         get_radiomics_features_for_entire_dir(input, output, stats_dir / "statistics_radiomics.json")
         if not quiet: print(f"  calculated in {time.time()-st:.2f}s")
 
-    return seg_img
+    os.remove("./temp_input.nii.gz")
+
+    return seg
